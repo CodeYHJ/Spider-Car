@@ -1,0 +1,11 @@
+*.pyc
+_trial_temp
+docs/_build
+*egg-info
+.tox
+.coverage
+venv
+dist
+build
+dev_settings.py
+pro_settings.py
