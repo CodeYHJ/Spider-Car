@@ -50,3 +50,13 @@ class FactorySales(DeclarativeBase):
     factory_id = Column('factory_id', Integer)
     update_at = Column('update_at', DateTime)
     sales_date = Column('sales_date', DateTime)
+
+
+class Car(DeclarativeBase):
+    __tablename__ = "car"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column('name', String)
+    level = Column('level', Integer)
+    car_id = Column('car_id', Integer)
+    factory_id = Column('factory_id', Integer)
+    update_at = Column('update_at', DateTime)

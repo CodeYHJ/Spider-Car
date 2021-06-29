@@ -21,13 +21,13 @@ class SalesItem(scrapy.Item):
     mid = scrapy.Field()
 
 
-class CarItem(scrapy.Item):
-    name = scrapy.Field()
-    company_name = scrapy.Field()
-    update_at = scrapy.Field()
-    id = scrapy.Field()
-    sohu_url = scrapy.Field()
-    mid = scrapy.Field()
+# class CarItem(scrapy.Item):
+#     name = scrapy.Field()
+#     company_name = scrapy.Field()
+#     update_at = scrapy.Field()
+#     id = scrapy.Field()
+#     sohu_url = scrapy.Field()
+#     mid = scrapy.Field()
 
 
 class FactoryItem(scrapy.Item):
@@ -44,4 +44,13 @@ class FactorySalesItem(scrapy.Item):
     sales_date = scrapy.Field()
     sales_num = scrapy.Field()
     update_at = scrapy.Field()
+    factory_id = scrapy.Field()
+
+
+class CarItem(scrapy.Item):
+    update_at = scrapy.Field()
+    id = scrapy.Field()
+    name = scrapy.Field()
+    level = scrapy.Field()
+    car_id = scrapy.Field()
     factory_id = scrapy.Field()
