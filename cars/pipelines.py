@@ -80,7 +80,7 @@ class CarsPipeline(object):
                 factory_sales = FactorySales(**item)
                 sales_date = item['sales_date']
                 factory_id = item['factory_id']
-                sql_data = session.query(FactorySales).filter(FactorySales.sales_date == sales_date and FactorySales.factory_id == factory_id).first()
+                sql_data = session.query(FactorySales).filter(FactorySales.sales_date == sales_date, FactorySales.factory_id == int(factory_id)).first()
                 if sql_data is None:
                     session.add(factory_sales)
                     session.commit()
