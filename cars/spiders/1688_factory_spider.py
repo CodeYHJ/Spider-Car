@@ -8,6 +8,7 @@ from enum import unique
 from scrapy.spidermiddlewares.httperror import HttpError
 from twisted.internet.error import DNSLookupError
 from twisted.internet.error import TimeoutError, TCPTimedOutError
+from cars.util import Log
 
 
 @unique
@@ -24,10 +25,14 @@ class CarModal(Enum):
 class FactorySpider(scrapy.Spider):
     name = "1688_factory"
     base_url = 'https://xl.16888.com'
-    custom_settings = {
+    pipelines = {
         'ITEM_PIPELINES': {
             'cars.pipelines.1688_pipelines.CarsPipeline': 400
         }
+    }
+    logConfig = Log.createLogConfig('1688_log_spider')
+    custom_settings = {
+        **pipelines, **logConfig
     }
 
     def start_requests(self):
@@ -127,9 +132,35 @@ class FactorySpider(scrapy.Spider):
                 item['factory_id'] = factory_id
                 item['update_at'] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
                 yield item
+                yield scrapy.Request(url=self.base_url+"/s/"+car_id+"/", callback=self.parse_car_sales)
         except Exception as e:
             self.logger.warning("%s url: %s", e, response.url)
 
+    def parse_car_sales(self, response):
+        try:
+            url = response.url
+            deleteLine = re.sub(r"/$", "", url)
+            car_id = re.sub(r"https://xl.16888.com/s/", "", deleteLine)
+            table = response.css("table")
+            tr_list = table.css("tr")
+            next_page_href = response.css('a.lineBlock.next::attr(href)').get()
+            for tr in tr_list:
+                td4 = tr.css("td.xl-td-t4::text")
+                if len(td4) == 0:
+                    continue
+                sales_date = td4[0].get()
+                sales_num = td4[1].get()
+                item = FactorySalesItem()
+                item['sales_date'] = datetime.strptime(sales_date, '%Y-%m').date()
+                item['sales_num'] = sales_num
+                item['car_id'] = car_id
+                item['update_at'] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+                yield item
+            if next_page_href:
+                url = self.base_url + next_page_href
+                yield scrapy.Request(url=url, callback=self.parse_factory_sales)
+        except Exception as e:
+            self.logger.warning("%s url: %s", e, response.url)
 
     def errback_httpbin(self, failure):
         # log all failures
@@ -140,11 +171,11 @@ class FactorySpider(scrapy.Spider):
             # these exceptions come from HttpError spider middleware
             # you can get the non-200 response
             response = failure.value.response
-            self.logger.error('HttpError on %s', response.url)
+            self.log.error('HttpError on %s', response.url)
         elif failure.check(DNSLookupError):
             # this is the original request
             request = failure.request
-            self.logger.error('DNSLookupError on %s', request.url)
+            self.log.error('DNSLookupError on %s', request.url)
         elif failure.check(TimeoutError, TCPTimedOutError):
             request = failure.request
-            self.logger.error('TimeoutError on %s', request.url)
+            self.log.error('TimeoutError on %s', request.url)

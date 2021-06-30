@@ -6,10 +6,10 @@
 
 # useful for handling different item types with a single interface
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import and_
 
-from cars.items import CarItem, SalesItem, FactoryItem, FactorySalesItem
-from cars.modules import db_connect, create_company_table, Car, Sales, Factory, FactorySales
+from cars.items import CarItem, FactoryItem, FactorySalesItem, CarSalesItem
+from cars.modules import db_connect, create_company_table, Car, Factory, FactorySales, CarSales
+from cars.util import Log
 
 
 class CarsPipeline(object):
@@ -17,6 +17,7 @@ class CarsPipeline(object):
         engine = db_connect(db_url)
         create_company_table(engine)
         self.Session = sessionmaker(bind=engine)
+        self.log = Log.createLog('1688_pipelines_log')
 
     @classmethod
     def from_crawler(cls, crawler):
@@ -24,7 +25,7 @@ class CarsPipeline(object):
         return cls(settings.get('PG_URL'))
 
     def close_spider(self):
-        self.Session().dispose()
+        self.Session().close()
 
     def process_item(self, item, spider):
         try:
@@ -87,7 +88,20 @@ class CarsPipeline(object):
                     sql_data.sales_num = item['sales_num']
                     sql_data.update_at = item['update_at']
                     session.commit()
+            elif isinstance(item, CarSalesItem):
+                carSales = CarSales(**item)
+                sales_date = item['sales_date']
+                factory_id = item['factory_id']
+                sql_data = session.query(CarSales).filter(CarSales.sales_date == sales_date, CarSales.factory_id == int(factory_id)).first()
+                if sql_data is None:
+                    session.add(carSales)
+                    session.commit()
+                else:
+                    sql_data.sales_num = item['sales_num']
+                    sql_data.update_at = item['update_at']
+                    session.commit()
             return item
         except Exception as e:
+            self.log.warning(e)
             self.Session().rollback()
-            print(e)
+

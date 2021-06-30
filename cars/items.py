@@ -54,3 +54,11 @@ class CarItem(scrapy.Item):
     level = scrapy.Field()
     car_id = scrapy.Field()
     factory_id = scrapy.Field()
+
+
+class CarSalesItem(scrapy.Item):
+    update_at = scrapy.Field()
+    id = scrapy.Field()
+    sales_date = scrapy.Field()
+    car_id = scrapy.Field()
+    sales_num = scrapy.Field()

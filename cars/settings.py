@@ -89,9 +89,3 @@ ITEM_PIPELINES = {
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
 
-# Log
-to_day = datetime.datetime.now()
-log_file_path = "log/scrapy_{}_{}_{}.log".format(to_day.year, to_day.month, to_day.day)
-LOG_FILE = log_file_path
-LOG_LEVEL = "WARNING"
-LOG_FORMAT = "%(levelname)s %(asctime)s %(message)s %(filename)s %(funcName)s"

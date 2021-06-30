@@ -60,3 +60,12 @@ class Car(DeclarativeBase):
     car_id = Column('car_id', Integer)
     factory_id = Column('factory_id', Integer)
     update_at = Column('update_at', DateTime)
+
+
+class CarSales(DeclarativeBase):
+    __tablename__ = "car_sales"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    sales_num = Column('sales_num', Integer)
+    car_id = Column('car_id', Integer)
+    update_at = Column('update_at', DateTime)
+    sales_date = Column('sales_date', DateTime)
