@@ -13,7 +13,7 @@ class Log(object):
     @staticmethod
     def createLogConfig(name):
         to_day = datetime.datetime.now()
-        log_file_path = "{}/scrapy_{}_{}_{}.log".format(name, to_day.year, to_day.month, to_day.day)
+        log_file_path = "log/{}/scrapy_{}_{}_{}.log".format(name, to_day.year, to_day.month, to_day.day)
         filename = log_file_path
         encoding = 'utf-8'
         level = "WARNING"
