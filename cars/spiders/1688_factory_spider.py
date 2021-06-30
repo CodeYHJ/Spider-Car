@@ -1,10 +1,13 @@
-import json
+import re
 import scrapy
 import time
 from datetime import datetime
 from cars.items import FactoryItem, FactorySalesItem, CarItem
 from enum import Enum
 from enum import unique
+from scrapy.spidermiddlewares.httperror import HttpError
+from twisted.internet.error import DNSLookupError
+from twisted.internet.error import TimeoutError, TCPTimedOutError
 
 
 @unique
@@ -28,6 +31,7 @@ class FactorySpider(scrapy.Spider):
     }
 
     def start_requests(self):
+        self.logger.warning('------------------1688 spiders start------------------')
         urls = [
             'https://xl.16888.com/factory.html'
         ]
@@ -35,7 +39,6 @@ class FactorySpider(scrapy.Spider):
             yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response):
-        yield scrapy.Request(url="https://xl.16888.com/f/57412/history-202104-202104-1.html", callback=self.parse_car)
         try:
             table = response.css("table")
             tr_list = table.css("tr")
@@ -62,7 +65,7 @@ class FactorySpider(scrapy.Spider):
                 url = self.base_url + next_page_href
                 yield scrapy.Request(url=url, callback=self.parse)
         except Exception as e:
-            print(e)
+            self.logger.warning("%s url: %s", e, response.url)
 
     def parse_factory_sales(self, response, factory_id):
         try:
@@ -85,15 +88,18 @@ class FactorySpider(scrapy.Spider):
                 car_url_month = self.base_url + '/f/' + factory_id + '/history-' + sales_date.replace('-',
                                                                                                       '') + '-' + sales_date.replace(
                     '-', '') + '-1.html'
-                yield scrapy.Request(url=car_url_month, callback=self.parse_car, cb_kwargs={'factory_id': factory_id})
+                yield scrapy.Request(url=car_url_month, callback=self.parse_car)
             if next_page_href:
                 url = self.base_url + next_page_href
                 yield scrapy.Request(url=url, callback=self.parse_factory_sales, cb_kwargs={'factory_id': factory_id})
         except Exception as e:
-            print(e)
+            self.logger.warning("%s url: %s", e, response.url)
 
-    def parse_car(self, response, factory_id):
+    def parse_car(self, response):
         try:
+            url = response.url
+            deleHistory = re.sub(r"/history.*$", "", url)
+            factory_id = re.sub(r"https://xl.16888.com/f/", "", deleHistory)
             table = response.css("table")
             tr_list = table.css("tr")
             for tr in tr_list:
@@ -122,4 +128,23 @@ class FactorySpider(scrapy.Spider):
                 item['update_at'] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
                 yield item
         except Exception as e:
-            print(e)
+            self.logger.warning("%s url: %s", e, response.url)
+
+
+    def errback_httpbin(self, failure):
+        # log all failures
+        self.logger.error(repr(failure))
+        # in case you want to do something special for some errors,
+        # you may need the failure's type:
+        if failure.check(HttpError):
+            # these exceptions come from HttpError spider middleware
+            # you can get the non-200 response
+            response = failure.value.response
+            self.logger.error('HttpError on %s', response.url)
+        elif failure.check(DNSLookupError):
+            # this is the original request
+            request = failure.request
+            self.logger.error('DNSLookupError on %s', request.url)
+        elif failure.check(TimeoutError, TCPTimedOutError):
+            request = failure.request
+            self.logger.error('TimeoutError on %s', request.url)
