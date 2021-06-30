@@ -2,7 +2,7 @@ import re
 import scrapy
 import time
 from datetime import datetime
-from cars.items import FactoryItem, FactorySalesItem, CarItem
+from cars.items import FactoryItem, FactorySalesItem, CarItem, CarSalesItem
 from enum import Enum
 from enum import unique
 from scrapy.spidermiddlewares.httperror import HttpError
@@ -150,7 +150,7 @@ class FactorySpider(scrapy.Spider):
                     continue
                 sales_date = td4[0].get()
                 sales_num = td4[1].get()
-                item = FactorySalesItem()
+                item = CarSalesItem()
                 item['sales_date'] = datetime.strptime(sales_date, '%Y-%m').date()
                 item['sales_num'] = sales_num
                 item['car_id'] = car_id
