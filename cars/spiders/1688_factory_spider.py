@@ -158,7 +158,7 @@ class FactorySpider(scrapy.Spider):
                 yield item
             if next_page_href:
                 url = self.base_url + next_page_href
-                yield scrapy.Request(url=url, callback=self.parse_factory_sales)
+                yield scrapy.Request(url=url, callback=self.parse_car_sales)
         except Exception as e:
             self.logger.warning("%s url: %s", e, response.url)
 
