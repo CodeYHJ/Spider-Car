@@ -6,13 +6,16 @@ from cars.items import FactoryItem, FactorySalesItem, CarItem
 from enum import Enum
 from enum import unique
 
+
 @unique
 class CarModal(Enum):
-    COMPACT = 1  # 紧凑型
-    SUV = 2
-    MEDIUM = 3  # 中型车
-    SUB_COMPACT = 4  # 小型车
+    MICRO = 1  # 微型
+    SUB_COMPACT = 2  # 小型车
+    COMPACT = 3  # 紧凑型
+    MID_SIZE = 4  # 中型车
+    FULL_SIZE = 5  # 中大型
     MPV = 5
+    SUV = 7
 
 
 class FactorySpider(scrapy.Spider):
@@ -79,7 +82,9 @@ class FactorySpider(scrapy.Spider):
                 item['factory_id'] = factory_id
                 item['update_at'] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
                 yield item
-                car_url_month = self.base_url+'/f/'+factory_id+'/history-'+sales_date.replace('-', '')+'-'+sales_date.replace('-', '')+'-1.html'
+                car_url_month = self.base_url + '/f/' + factory_id + '/history-' + sales_date.replace('-',
+                                                                                                      '') + '-' + sales_date.replace(
+                    '-', '') + '-1.html'
                 yield scrapy.Request(url=car_url_month, callback=self.parse_car, cb_kwargs={'factory_id': factory_id})
             if next_page_href:
                 url = self.base_url + next_page_href
@@ -100,10 +105,12 @@ class FactorySpider(scrapy.Spider):
                 name = td_list[0].css("a::text").get()
                 level_text = td_list[2].css("::text").get()
                 level_obj = {
+                    "微型车": "MICRO",
+                    "小型车": "SUB_COMPACT",
                     "紧凑型车": "COMPACT",
+                    "中型车": "MID_SIZE",
+                    "中大型车": "FULL_SIZE",
                     "SUV": "SUV",
-                    "MEDIUM": "MEDIUM",
-                    "SUB_COMPACT": "SUB_COMPACT",
                     "MPV": "MPV"
                 }
                 level = CarModal[level_obj[level_text]].value
