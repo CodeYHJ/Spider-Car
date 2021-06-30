@@ -14,7 +14,7 @@ class CarModal(Enum):
     COMPACT = 3  # 紧凑型
     MID_SIZE = 4  # 中型车
     FULL_SIZE = 5  # 中大型
-    MPV = 5
+    MPV = 6
     SUV = 7
 
 
