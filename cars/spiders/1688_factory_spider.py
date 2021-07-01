@@ -117,6 +117,8 @@ class FactorySpider(scrapy.Spider):
                     car_id = td_list[0].css("a::attr(href)").get().replace('/s/', '').replace('/', '')
                     name = td_list[0].css("a::text").get()
                     level_text = td_list[2].css("::text").get()
+                    if len(level_text) == 0:
+                        continue
                     level_obj = {
                         "微型车": "MICRO",
                         "小型车": "SUB_COMPACT",
@@ -140,13 +142,12 @@ class FactorySpider(scrapy.Spider):
 
     def parse_car_sales(self, response):
             url = response.url
-            deleteLine = re.sub(r"/$", "", url)
-            car_id = re.sub(r"https://xl.16888.com/s/", "", deleteLine)
+            deleteFront = re.sub(r"https://xl.16888.com/s/", "", url)
+            car_id = re.sub(r"/|-\d.html", "", deleteFront)
             table = response.css("table")
             tr_list = table.css("tr")
             next_page_href = response.css('a.lineBlock.next::attr(href)').get()
             try:
-
                 for tr in tr_list:
                     td4 = tr.css("td.xl-td-t4::text")
                     if len(td4) == 0:
