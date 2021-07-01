@@ -154,6 +154,8 @@ class FactorySpider(scrapy.Spider):
                     sales_date = td4[0].get()
                     if sales_date == "--":
                         continue
+                    if sales_num == "--":
+                        continue
                     sales_num = td4[1].get()
                     item = CarSalesItem()
                     item['sales_date'] = datetime.strptime(sales_date, '%Y-%m').date()

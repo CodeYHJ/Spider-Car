@@ -91,8 +91,8 @@ class CarsPipeline(object):
             elif isinstance(item, CarSalesItem):
                 carSales = CarSales(**item)
                 sales_date = item['sales_date']
-                factory_id = item['factory_id']
-                sql_data = session.query(CarSales).filter(CarSales.sales_date == sales_date, CarSales.factory_id == int(factory_id)).first()
+                car_id = item['car_id']
+                sql_data = session.query(CarSales).filter(CarSales.sales_date == sales_date, CarSales.car_id == int(car_id)).first()
                 if sql_data is None:
                     session.add(carSales)
                     session.commit()
