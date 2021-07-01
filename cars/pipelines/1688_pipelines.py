@@ -102,6 +102,6 @@ class CarsPipeline(object):
                     session.commit()
             return item
         except Exception as e:
-            self.log.warning(e)
+            self.log.warning("err: %s, item: %s", e, item)
             self.Session().rollback()
 
