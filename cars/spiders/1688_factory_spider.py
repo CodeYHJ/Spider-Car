@@ -117,7 +117,9 @@ class FactorySpider(scrapy.Spider):
                     car_id = td_list[0].css("a::attr(href)").get().replace('/s/', '').replace('/', '')
                     name = td_list[0].css("a::text").get()
                     level_text = td_list[2].css("::text").get()
-                    if len(level_text) == 0:
+                    if level_text is None:
+                        continue
+                    elif len(level_text) == 0:
                         continue
                     level_obj = {
                         "微型车": "MICRO",
