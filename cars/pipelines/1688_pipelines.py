@@ -7,6 +7,7 @@
 # useful for handling different item types with a single interface
 from sqlalchemy.orm import sessionmaker
 
+from cars.dbHelper import DBHelper
 from cars.items import CarItem, FactoryItem, FactorySalesItem, CarSalesItem
 from cars.modules import db_connect, create_company_table, Car, Factory, FactorySales, CarSales
 from cars.util import Log
@@ -14,9 +15,10 @@ from cars.util import Log
 
 class CarsPipeline(object):
     def __init__(self, db_url):
-        engine = db_connect(db_url)
-        create_company_table(engine)
-        self.Session = sessionmaker(bind=engine)
+        # engine = db_connect(db_url)
+        # create_company_table(engine)
+        # self.Session = sessionmaker(bind=engine)
+        self.db_url = db_url
         self.log = Log.createLog('1688_pipelines_log')
 
     @classmethod
@@ -24,12 +26,10 @@ class CarsPipeline(object):
         settings = crawler.settings
         return cls(settings.get('PG_URL'))
 
-    def close_spider(self):
-        self.Session().close()
-
     def process_item(self, item, spider):
         try:
-            session = self.Session()
+            # session = self.Session()
+            session = DBHelper.db_connect(self.db_url)
             if isinstance(item, CarItem):
                 car = Car(**item)
                 name = item['name']
@@ -100,8 +100,9 @@ class CarsPipeline(object):
                     sql_data.sales_num = item['sales_num']
                     sql_data.update_at = item['update_at']
                     session.commit()
+            session.close()
             return item
         except Exception as e:
             self.log.warning("err: %s, item: %s", e, item)
-            self.Session().rollback()
+            session.rollback()
 
