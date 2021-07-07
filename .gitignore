@@ -9,3 +9,4 @@ dist
 build
 dev_settings.py
 pro_settings.py
+log
