@@ -152,12 +152,12 @@ class FactorySpider(scrapy.Spider):
             try:
                 for tr in tr_list:
                     td4 = tr.css("td.xl-td-t4::text")
-                    if sales_date is None:
-                        continue
-                    elif len(td4) == 0:
+                    if len(td4) == 0:
                         continue
                     sales_date = td4[0].get()
-                    if sales_date == "--":
+                    if sales_date is None:
+                        continue
+                    elif sales_date == "--":
                         continue
                     sales_num = td4[1].get()
                     if sales_num == "--":
