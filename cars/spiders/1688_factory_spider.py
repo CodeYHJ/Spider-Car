@@ -40,8 +40,9 @@ class FactorySpider(scrapy.Spider):
         urls = [
             'https://xl.16888.com/factory.html'
         ]
-        for url in urls:
-            yield scrapy.Request(url=url, callback=self.parse)
+        yield scrapy.Request(url='http://xl.16888.com/s/128090/',callback=self.parse_car_sales)
+        # for url in urls:
+        #     yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response):
             table = response.css("table")
@@ -151,15 +152,15 @@ class FactorySpider(scrapy.Spider):
             next_page_href = response.css('a.lineBlock.next::attr(href)').get()
             try:
                 for tr in tr_list:
-                    td4 = tr.css("td.xl-td-t4::text")
+                    td4 = tr.css("td.xl-td-t4")
                     if len(td4) == 0:
                         continue
-                    sales_date = td4[0].get()
+                    sales_date = td4[0].css('::text').get()
                     if sales_date is None:
                         continue
                     elif sales_date == "--":
                         continue
-                    sales_num = td4[1].get()
+                    sales_num = td4[1].css('::text').get()
                     if sales_num == "--":
                         continue
                     item = CarSalesItem()
@@ -169,7 +170,7 @@ class FactorySpider(scrapy.Spider):
                     item['update_at'] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
                     yield item
             except Exception as e:
-                self.logger.warning("%s url: %s, data: item", e, response.url, item)
+                self.logger.warning("%s url: %s, data: %s", e, response.url, item)
             if next_page_href:
                 url = self.base_url + next_page_href
                 yield scrapy.Request(url=url, callback=self.parse_car_sales)
