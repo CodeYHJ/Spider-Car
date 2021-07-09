@@ -47,35 +47,33 @@ class FactorySpider(scrapy.Spider):
         self.logger.warning('------------------1688 spiders end------------------')
 
     def parse(self, response):
+        try:
             table = response.css("table")
             tr_list = table.css("tr")
             next_page_href = response.css('a.lineBlock.next::attr(href)').get()
-            try:
-                for tr in tr_list:
-                    td2 = tr.css("td.xl-td-t2")
-                    if len(td2) == 0:
-                        continue
-                    factory_id = td2.css("a::attr(href)").get().replace('/f/', '').replace('/', '')
-                    name = td2.css("a::text").get()
-                    if name is None:
-                        continue
-                    td3_list = tr.css("td.xl-td-t3::text")
-                    sales_total = td3_list[0].get()
-                    item = FactoryItem()
-                    item['name'] = name
-                    item['sales_total'] = sales_total
-                    item['factory_id'] = factory_id
-                    item['update_at'] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-                    yield item
-                    yield scrapy.Request(url=self.base_url + '/f/' + factory_id + '/', callback=self.parse_factory_sales,
-                                         cb_kwargs={'factory_id': factory_id})
-            except Exception as e:
-                self.logger.warning("%s, url: %s, data: item", e, response.url, item)
-
+            for tr in tr_list:
+                td2 = tr.css("td.xl-td-t2")
+                if len(td2) == 0:
+                    continue
+                factory_id = td2.css("a::attr(href)").get().replace('/f/', '').replace('/', '')
+                name = td2.css("a::text").get()
+                if name is None:
+                    continue
+                td3_list = tr.css("td.xl-td-t3::text")
+                sales_total = td3_list[0].get()
+                item = FactoryItem()
+                item['name'] = name
+                item['sales_total'] = sales_total
+                item['factory_id'] = factory_id
+                item['update_at'] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+                yield item
+                yield scrapy.Request(url=self.base_url + '/f/' + factory_id + '/', callback=self.parse_factory_sales,
+                                     cb_kwargs={'factory_id': factory_id})
             if next_page_href:
                 url = self.base_url + next_page_href
                 yield scrapy.Request(url=url, callback=self.parse)
-
+        except Exception as e:
+            self.logger.warning("%s, url: %s, data: item", e, response.url, item)
 
     def parse_factory_sales(self, response, factory_id):
         try:
@@ -106,76 +104,77 @@ class FactorySpider(scrapy.Spider):
             self.logger.warning("%s url: %s", e, response.url)
 
     def parse_car(self, response):
+        try:
             url = response.url
             deleHistory = re.sub(r"/history.*$", "", url)
             factory_id = re.sub(r"https://xl.16888.com/f/", "", deleHistory)
             table = response.css("table")
             tr_list = table.css("tr")
-            try:
-                for tr in tr_list:
-                    td4 = tr.css("td.xl-td-t4::text")
-                    if len(td4) == 0:
-                        continue
-                    td_list = tr.css("td")
-                    car_id = td_list[0].css("a::attr(href)").get().replace('/s/', '').replace('/', '')
-                    name = td_list[0].css("a::text").get()
-                    level_text = td_list[2].css("::text").get()
-                    if level_text is None:
-                        continue
-                    elif len(level_text) == 0:
-                        continue
-                    level_obj = {
-                        "微型车": "MICRO",
-                        "小型车": "SUB_COMPACT",
-                        "紧凑型车": "COMPACT",
-                        "中型车": "MID_SIZE",
-                        "中大型车": "FULL_SIZE",
-                        "SUV": "SUV",
-                        "MPV": "MPV"
-                    }
-                    level = CarModal[level_obj[level_text]].value
-                    item = CarItem()
-                    item['car_id'] = car_id
-                    item['name'] = name
-                    item['level'] = level
-                    item['factory_id'] = factory_id
-                    item['update_at'] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-                    yield item
-                    yield scrapy.Request(url=self.base_url+"/s/"+car_id+"/", callback=self.parse_car_sales)
-            except Exception as e:
-                self.logger.warning("%s url: %s, data: item", e, response.url, item)
+            for tr in tr_list:
+                td4 = tr.css("td.xl-td-t4::text")
+                if len(td4) == 0:
+                    continue
+                td_list = tr.css("td")
+                car_id = td_list[0].css("a::attr(href)").get().replace('/s/', '').replace('/', '')
+                name = td_list[0].css("a::text").get()
+                level_text = td_list[2].css("::text").get()
+                if level_text is None:
+                    continue
+                elif len(level_text) == 0:
+                    continue
+                level_obj = {
+                    "微型车": "MICRO",
+                    "小型车": "SUB_COMPACT",
+                    "紧凑型车": "COMPACT",
+                    "中型车": "MID_SIZE",
+                    "中大型车": "FULL_SIZE",
+                    "SUV": "SUV",
+                    "MPV": "MPV"
+                }
+                level = CarModal[level_obj[level_text]].value
+                item = CarItem()
+                item['car_id'] = car_id
+                item['name'] = name
+                item['level'] = level
+                item['factory_id'] = factory_id
+                item['update_at'] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+                yield item
+                yield scrapy.Request(url=self.base_url+"/s/"+car_id+"/", callback=self.parse_car_sales)
+        except Exception as e:
+            self.logger.warning("%s url: %s, data: item", e, response.url, item)
 
     def parse_car_sales(self, response):
+        try:
             url = response.url
             deleteFront = re.sub(r"https://xl.16888.com/s/", "", url)
             car_id = re.sub(r"/|-\d.html", "", deleteFront)
             table = response.css("table")
             tr_list = table.css("tr")
             next_page_href = response.css('a.lineBlock.next::attr(href)').get()
-            try:
-                for tr in tr_list:
-                    td4 = tr.css("td.xl-td-t4")
-                    if len(td4) == 0:
-                        continue
-                    sales_date = td4[0].css('::text').get()
-                    if sales_date is None:
-                        continue
-                    elif sales_date == "--":
-                        continue
-                    sales_num = td4[1].css('::text').get()
-                    if sales_num == "--":
-                        continue
-                    item = CarSalesItem()
-                    item['sales_date'] = datetime.strptime(sales_date, '%Y-%m').date()
-                    item['sales_num'] = sales_num
-                    item['car_id'] = car_id
-                    item['update_at'] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-                    yield item
-            except Exception as e:
-                self.logger.warning("%s url: %s, data: %s", e, response.url, item)
+            for tr in tr_list:
+                td4 = tr.css("td.xl-td-t4")
+                if len(td4) == 0:
+                    continue
+                sales_date = td4[0].css('::text').get()
+                if sales_date is None:
+                    continue
+                elif sales_date == "--":
+                    continue
+                sales_num = td4[1].css('::text').get()
+                if sales_num == "--":
+                    continue
+                item = CarSalesItem()
+                item['sales_date'] = datetime.strptime(sales_date, '%Y-%m').date()
+                item['sales_num'] = sales_num
+                item['car_id'] = car_id
+                item['update_at'] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+                yield item
             if next_page_href:
                 url = self.base_url + next_page_href
                 yield scrapy.Request(url=url, callback=self.parse_car_sales)
+
+        except Exception as e:
+            self.logger.warning("%s url: %s, data: %s", e, response.url, item)
 
     def errback_httpbin(self, failure):
         # log all failures
