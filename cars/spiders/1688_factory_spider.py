@@ -40,9 +40,8 @@ class FactorySpider(scrapy.Spider):
         urls = [
             'https://xl.16888.com/factory.html'
         ]
-        yield scrapy.Request(url='http://xl.16888.com/s/128090/',callback=self.parse_car_sales)
-        # for url in urls:
-        #     yield scrapy.Request(url=url, callback=self.parse)
+        for url in urls:
+            yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response):
             table = response.css("table")
