@@ -43,6 +43,9 @@ class FactorySpider(scrapy.Spider):
         for url in urls:
             yield scrapy.Request(url=url, callback=self.parse)
 
+    def closed(self):
+        self.logger.warning('------------------1688 spiders end------------------')
+
     def parse(self, response):
             table = response.css("table")
             tr_list = table.css("tr")
