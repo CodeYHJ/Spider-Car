@@ -6,12 +6,6 @@
 import scrapy
 
 
-# class TutorialItem(scrapy.Item):
-#     # define the fields for your item here like:
-#     # name = scrapy.Field()
-#
-#     pass
-
 class SalesItem(scrapy.Item):
     sales_time = scrapy.Field()
     sales = scrapy.Field()
@@ -21,21 +15,11 @@ class SalesItem(scrapy.Item):
     mid = scrapy.Field()
 
 
-# class CarItem(scrapy.Item):
-#     name = scrapy.Field()
-#     company_name = scrapy.Field()
-#     update_at = scrapy.Field()
-#     id = scrapy.Field()
-#     sohu_url = scrapy.Field()
-#     mid = scrapy.Field()
-
-
 class FactoryItem(scrapy.Item):
     id = scrapy.Field()
     name = scrapy.Field()
     factory_id = scrapy.Field()
     country = scrapy.Field()
-    sales_total = scrapy.Field()
     update_at = scrapy.Field()
 
 

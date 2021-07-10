@@ -74,7 +74,6 @@ class CarsPipeline(object):
                     sql_data.name = item['name']
                     sql_data.factory_id = item['factory_id']
                     sql_data.update_at = item['update_at']
-                    sql_data.sales_total = item['sales_total']
                     session.commit()
             elif isinstance(item, FactorySalesItem):
                 factory_sales = FactorySales(**item)

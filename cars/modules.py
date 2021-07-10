@@ -40,7 +40,6 @@ class Factory(DeclarativeBase):
     name = Column('name', String)
     factory_id = Column('factory_id', Integer)
     update_at = Column('update_at', DateTime)
-    sales_total = Column('sales_total', Integer)
 
 
 class FactorySales(DeclarativeBase):

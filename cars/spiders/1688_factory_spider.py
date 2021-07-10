@@ -59,11 +59,8 @@ class FactorySpider(scrapy.Spider):
                 name = td2.css("a::text").get()
                 if name is None:
                     continue
-                td3_list = tr.css("td.xl-td-t3::text")
-                sales_total = td3_list[0].get()
                 item = FactoryItem()
                 item['name'] = name
-                item['sales_total'] = sales_total
                 item['factory_id'] = factory_id
                 item['update_at'] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
                 yield item
