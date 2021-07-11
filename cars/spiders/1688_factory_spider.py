@@ -36,7 +36,7 @@ class FactorySpider(scrapy.Spider):
     }
 
     def start_requests(self):
-        self.logger.warning('------------------1688 spiders start------------------')
+        self.logger.info('------------------1688 spiders start------------------')
         urls = [
             'https://xl.16888.com/factory.html'
         ]
@@ -44,7 +44,7 @@ class FactorySpider(scrapy.Spider):
             yield scrapy.Request(url=url, callback=self.parse)
 
     def closed(self):
-        self.logger.warning('------------------1688 spiders end------------------')
+        self.logger.info('------------------1688 spiders end------------------')
 
     def parse(self, response):
         try:
